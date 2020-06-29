@@ -16,7 +16,7 @@ namespace Microsoft.MixedReality.Toolkit.Examples.Demos
         [SerializeField]
         private TextMeshPro textMesh = null;
 
-        public void OnSliderUpdated(SliderEventData eventData)
+        public void OnSliderUpdated(RangeValueEventData eventData)
         {
             if (textMesh == null)
             {

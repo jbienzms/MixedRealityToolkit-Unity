@@ -69,26 +69,12 @@ namespace Microsoft.MixedReality.Toolkit.UI
     public abstract class RangeControl : MonoBehaviour, IMixedRealityRangeControl, IMixedRealityPointerHandler, IMixedRealityFocusHandler
     {
         #region Unity Inspector Fields
-        [Header("Range")]
+        [Header("Range", order=0)]
         [Tooltip("The starting value of the control.")]
         [Range(0, 1)]
         [SerializeField]
         private float value = 0.0f;
         #endregion // Unity Inspector Fields
-
-        #region Unity Events
-        [Header("Events")]
-        [SerializeField]
-        private RangeEvent onHoverEntered = new RangeEvent();
-        [SerializeField]
-        private RangeEvent onHoverExited = new RangeEvent();
-        [SerializeField]
-        private RangeEvent onInteractionStarted = new RangeEvent();
-        [SerializeField]
-        private RangeEvent onInteractionEnded = new RangeEvent();
-        [SerializeField]
-        private RangeValueEvent onValueUpdated = new RangeValueEvent();
-        #endregion // Unity Events
 
         #region Internal Methods
         /// <summary>
@@ -143,7 +129,7 @@ namespace Microsoft.MixedReality.Toolkit.UI
         /// </summary>
         protected virtual void On_HoverEntered()
         {
-            onHoverEntered.Invoke(new RangeEventData(this));
+            OnHoverEntered.Invoke(new RangeEventData(this));
         }
 
         /// <summary>
@@ -151,7 +137,7 @@ namespace Microsoft.MixedReality.Toolkit.UI
         /// </summary>
         protected virtual void On_HoverExited()
         {
-            onHoverExited.Invoke(new RangeEventData(this));
+            OnHoverExited.Invoke(new RangeEventData(this));
         }
 
         /// <summary>
@@ -159,7 +145,7 @@ namespace Microsoft.MixedReality.Toolkit.UI
         /// </summary>
         protected virtual void On_InteractionStarted()
         {
-            onInteractionStarted.Invoke(new RangeEventData(this));
+            OnInteractionStarted.Invoke(new RangeEventData(this));
         }
 
         /// <summary>
@@ -167,7 +153,7 @@ namespace Microsoft.MixedReality.Toolkit.UI
         /// </summary>
         protected virtual void On_InteractionEnded()
         {
-            onInteractionEnded.Invoke(new RangeEventData(this));
+            OnInteractionEnded.Invoke(new RangeEventData(this));
         }
 
         /// <see cref="IMixedRealityPointerHandler.OnPointerClicked"/>
@@ -214,7 +200,7 @@ namespace Microsoft.MixedReality.Toolkit.UI
         /// </param>
         protected virtual void On_ValueUpdated(float oldValue, float newValue)
         {
-            onValueUpdated.Invoke(new RangeValueEventData(this, value, value));
+            OnValueUpdated.Invoke(new RangeValueEventData(this, oldValue, newValue));
         }
         #endregion // Overridables / Event Triggers
 
@@ -258,6 +244,14 @@ namespace Microsoft.MixedReality.Toolkit.UI
         }
         #endregion
 
+        #region IMixedRealityRangeControl
+        RangeEvent IMixedRealityRangeControl.OnHoverEntered => OnHoverEntered;
+        RangeEvent IMixedRealityRangeControl.OnHoverExited => OnHoverExited;
+        RangeEvent IMixedRealityRangeControl.OnInteractionStarted => OnInteractionStarted;
+        RangeEvent IMixedRealityRangeControl.OnInteractionEnded => OnInteractionEnded;
+        RangeValueEvent IMixedRealityRangeControl.OnValueUpdated => OnValueUpdated;
+        #endregion // IMixedRealityRangeControl
+
         #region Public Properties
         /// <summary>
         /// Gets the currently active pointer manipulating or hovering over the control.
@@ -280,21 +274,46 @@ namespace Microsoft.MixedReality.Toolkit.UI
         }
         #endregion // Public Properties
 
-        #region Events
-        /// <inheritdoc/>
-        public RangeEvent OnHoverEntered => onHoverEntered;
+        #region Unity Events
+        [Header("Events", order = 255)]
+        /// <summary>
+        /// Raised when the user's hand or controller hovers over the control.
+        /// </summary>
+        /// <remarks>
+        /// This event is raised for both near and far interactions.
+        /// </remarks>
+        public RangeEvent OnHoverEntered = new RangeEvent();
 
-        /// <inheritdoc/>
-        public RangeEvent OnHoverExited => onHoverExited;
+        /// <summary>
+        /// Raised when the user's hand or controller is no longer over the control.
+        /// </summary>
+        /// <remarks>
+        /// This event is raised for both near and far interactions.
+        /// </remarks>
+        public RangeEvent OnHoverExited = new RangeEvent();
 
-        /// <inheritdoc/>
-        public RangeEvent OnInteractionStarted => onInteractionStarted;
+        /// <summary>
+        /// Raised when the user begins interacting with the control.
+        /// </summary>
+        /// <remarks>
+        /// For example, this event is raised when the user grabs the thumb of the
+        /// <see cref="PinchSlider"/> control.
+        /// </remarks>
+        public RangeEvent OnInteractionStarted = new RangeEvent();
 
-        /// <inheritdoc/>
-        public RangeEvent OnInteractionEnded => onInteractionEnded;
+        /// <summary>
+        /// Called when the user is no longer interacting with the control.
+        /// </summary>
+        /// <remarks>
+        /// For example, this event is raised when the user releases the thumb of the
+        /// <see cref="PinchSlider"/> control.
+        /// </remarks>
+        public RangeEvent OnInteractionEnded = new RangeEvent();
 
-        /// <inheritdoc/>
-        public RangeValueEvent OnValueUpdated => onValueUpdated;
-        #endregion // Events
+        /// <summary>
+        /// Raised whenever the <see cref="Value"/> property changes.
+        /// </summary>
+        public RangeValueEvent OnValueUpdated = new RangeValueEvent();
+        #endregion // Unity Events
     }
 }

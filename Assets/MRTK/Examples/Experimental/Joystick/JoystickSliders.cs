@@ -47,12 +47,12 @@ namespace Microsoft.MixedReality.Toolkit.Experimental.Joystick
         }
         private void CalculateValues()
         {
-            CurrentMoveValue = (DefaultMoveValue * 2) * SliderMove.SliderValue + MinimumFloatValue;
-            CurrentScaleValue = (DefaultScaleValue * 2) * SliderScale.SliderValue + MinimumFloatValue;
-            CurrentRotateValue = (DefaultRotateValue * 2) * SliderRotate.SliderValue + MinimumFloatValue;
-            CurrentReboundValue = (DefaultReboundValue * 2) * SliderRebound.SliderValue + MinimumIntValue;
-            CurrentSensitivityHorizontalValue = (DefaultSensitivityHorizontalValue * 2) * SliderSensitivityHorizontal.SliderValue + MinimumIntValue;
-            CurrentSliderSensitivityVerticalValue = (DefaultSliderSensitivityVerticalValue * 2) * SliderSensitivityVertical.SliderValue + MinimumIntValue;
+            CurrentMoveValue = (DefaultMoveValue * 2) * SliderMove.Value + MinimumFloatValue;
+            CurrentScaleValue = (DefaultScaleValue * 2) * SliderScale.Value + MinimumFloatValue;
+            CurrentRotateValue = (DefaultRotateValue * 2) * SliderRotate.Value + MinimumFloatValue;
+            CurrentReboundValue = (DefaultReboundValue * 2) * SliderRebound.Value + MinimumIntValue;
+            CurrentSensitivityHorizontalValue = (DefaultSensitivityHorizontalValue * 2) * SliderSensitivityHorizontal.Value + MinimumIntValue;
+            CurrentSliderSensitivityVerticalValue = (DefaultSliderSensitivityVerticalValue * 2) * SliderSensitivityVertical.Value + MinimumIntValue;
         }
         public void UpdateSliderValues()
         {

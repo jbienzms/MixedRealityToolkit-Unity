@@ -15,7 +15,7 @@ namespace Microsoft.MixedReality.Toolkit.Examples.Demos
         [SerializeField]
         private Renderer TargetRenderer;
 
-        public void OnSliderUpdatedRed(SliderEventData eventData)
+        public void OnSliderUpdatedRed(RangeValueEventData eventData)
         {
             TargetRenderer = GetComponentInChildren<Renderer>();
             if ((TargetRenderer != null) && (TargetRenderer.material != null))
@@ -24,7 +24,7 @@ namespace Microsoft.MixedReality.Toolkit.Examples.Demos
             }
         }
 
-        public void OnSliderUpdatedGreen(SliderEventData eventData)
+        public void OnSliderUpdatedGreen(RangeValueEventData eventData)
         {
             TargetRenderer = GetComponentInChildren<Renderer>();
             if ((TargetRenderer != null) && (TargetRenderer.material != null))
@@ -33,7 +33,7 @@ namespace Microsoft.MixedReality.Toolkit.Examples.Demos
             }
         }
 
-        public void OnSliderUpdateBlue(SliderEventData eventData)
+        public void OnSliderUpdateBlue(RangeValueEventData eventData)
         {
             TargetRenderer = GetComponentInChildren<Renderer>();
             if ((TargetRenderer != null) && (TargetRenderer.material != null))

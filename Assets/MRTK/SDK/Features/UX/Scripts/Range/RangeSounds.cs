@@ -13,7 +13,6 @@ namespace Microsoft.MixedReality.Toolkit.UI
     /// <summary>
     /// Component that plays sounds to communicate the states of a range control.
     /// </summary>
-    [RequireComponent(typeof(Rotator))]
     [AddComponentMenu("Scripts/MRTK/SDK/RangeSounds")]
     public class RangeSounds : MonoBehaviour
     {
@@ -127,7 +126,7 @@ namespace Microsoft.MixedReality.Toolkit.UI
             }
             if (control == null)
             {
-                control = GetComponent<RangeControl>();
+                Control = GetComponent<RangeControl>();
             }
         }
         #endregion // Unity Overrides

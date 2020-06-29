@@ -15,7 +15,7 @@ namespace Microsoft.MixedReality.Toolkit.Examples.Demos
         [SerializeField]
         private Transform transformLandingGear = null;
 
-        public void OnSliderUpdated(SliderEventData eventData)
+        public void OnSliderUpdated(RangeValueEventData eventData)
         {
             if (transformLandingGear != null)
             {

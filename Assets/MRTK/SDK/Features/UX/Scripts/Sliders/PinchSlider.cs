@@ -14,9 +14,11 @@ namespace Microsoft.MixedReality.Toolkit.UI
     /// </summary>
     [HelpURL("https://microsoft.github.io/MixedRealityToolkit-Unity/Documentation/README_Sliders.html")]
     [AddComponentMenu("Scripts/MRTK/SDK/PinchSlider")]
-    public class PinchSlider : MonoBehaviour, IMixedRealityPointerHandler, IMixedRealityFocusHandler
+    public class PinchSlider : RangeControl
     {
         #region Serialized Fields and Properties
+        [Header("Pinch Slider", order = 1)]
+
         [Tooltip("The gameObject that contains the slider thumb.")]
         [SerializeField]
         private GameObject thumbRoot = null;
@@ -33,22 +35,7 @@ namespace Microsoft.MixedReality.Toolkit.UI
             }
         }
 
-        [Range(0, 1)]
-        [SerializeField]
-        private float sliderValue = 0.5f;
-        public float SliderValue
-        {
-            get { return sliderValue; }
-            set
-            {
-                var oldSliderValue = sliderValue;
-                sliderValue = value;
-                UpdateUI();
-                OnValueUpdated.Invoke(new SliderEventData(oldSliderValue, value, activePointer, this));
-            }
-        }
-
-        [Header("Slider Axis Visuals")]
+        [Header("Slider Axis Visuals", order=2)]
 
         [Tooltip("The gameObject that contains the trackVisuals. This will get rotated to match the slider axis")]
         [SerializeField]
@@ -206,20 +193,10 @@ namespace Microsoft.MixedReality.Toolkit.UI
 
         #endregion
 
-        #region Event Handlers
-        [Header("Events")]
-        public SliderEvent OnValueUpdated = new SliderEvent();
-        public SliderEvent OnInteractionStarted = new SliderEvent();
-        public SliderEvent OnInteractionEnded = new SliderEvent();
-        public SliderEvent OnHoverEntered = new SliderEvent();
-        public SliderEvent OnHoverExited = new SliderEvent();
-        #endregion
-
         #region Private Members
-        private float startSliderValue;
+        private float startValue;
         private Vector3 startPointerPosition;
         private Vector3 startSliderPosition;
-        private IMixedRealityPointer activePointer;
         private Vector3 sliderThumbOffset = Vector3.zero;
         #endregion
 
@@ -228,30 +205,26 @@ namespace Microsoft.MixedReality.Toolkit.UI
         /// Minimum distance between start and end of slider, in world space
         /// </summary>
         private const float MinSliderLength = 0.001f;
-        #endregion  
+        #endregion
 
         #region Unity methods
-        public void Start()
+        protected override void Start()
         {
             if (thumbRoot == null)
             {
                 throw new Exception($"Slider thumb on gameObject {gameObject.name} is not specified. Did you forget to set it?");
             }
             InitializeSliderThumb();
-            OnValueUpdated.Invoke(new SliderEventData(sliderValue, sliderValue, null, this));
+
+            // Pass to base to complete
+            base.Start();
         }
 
-        private void OnDisable()
-        {
-            if (activePointer != null)
-            {
-                EndInteraction();
-            }
-        }
 
-        private void OnValidate()
+        protected override void OnValidate()
         {
             CurrentSliderAxis = sliderAxis;
+            base.OnValidate();
         }
 
         #endregion
@@ -380,78 +353,54 @@ namespace Microsoft.MixedReality.Toolkit.UI
 
         private void UpdateUI()
         {
-            var newSliderPos = SliderStartPosition + sliderThumbOffset + SliderTrackDirection * sliderValue;
+            var newSliderPos = SliderStartPosition + sliderThumbOffset + SliderTrackDirection * Value;
             thumbRoot.transform.position = newSliderPos;
         }
-
-        private void EndInteraction()
-        {
-            if (OnInteractionEnded != null)
-            {
-                OnInteractionEnded.Invoke(new SliderEventData(sliderValue, sliderValue, activePointer, this));
-            }
-            activePointer = null;
-        }
-
         #endregion
 
-        #region IMixedRealityFocusHandler
-        public void OnFocusEnter(FocusEventData eventData)
-        {
-            OnHoverEntered.Invoke(new SliderEventData(sliderValue, sliderValue, eventData.Pointer, this));
-        }
 
-        public void OnFocusExit(FocusEventData eventData)
+        #region Overrides / Event Handlers
+        /// <inheritdoc/>
+        protected override void On_PointerDown(MixedRealityPointerEventData eventData)
         {
-            OnHoverExited.Invoke(new SliderEventData(sliderValue, sliderValue, eventData.Pointer, this));
-        }
-        #endregion
-
-        #region IMixedRealityPointerHandler
-
-        public void OnPointerUp(MixedRealityPointerEventData eventData)
-        {
-            if (eventData.Pointer == activePointer && !eventData.used)
+            if (Pointer == null && !eventData.used)
             {
-                EndInteraction();
-
-                // Mark the pointer data as used to prevent other behaviors from handling input events
-                eventData.Use();
-            }
-        }
-
-        public void OnPointerDown(MixedRealityPointerEventData eventData)
-        {
-            if (activePointer == null && !eventData.used)
-            {
-                activePointer = eventData.Pointer;
-                startSliderValue = sliderValue;
-                startPointerPosition = activePointer.Position;
+                startValue = Value;
+                startPointerPosition = eventData.Pointer.Position;
                 startSliderPosition = gameObject.transform.position;
-                if (OnInteractionStarted != null)
-                {
-                    OnInteractionStarted.Invoke(new SliderEventData(sliderValue, sliderValue, activePointer, this));
-                }
-
-                // Mark the pointer data as used to prevent other behaviors from handling input events
-                eventData.Use();
             }
+
+            // Pass on to base (which marks it as used)
+            base.On_PointerDown(eventData);
         }
 
-        public void OnPointerDragged(MixedRealityPointerEventData eventData)
+        /// <inheritdoc/>
+        protected override void On_PointerDragged(MixedRealityPointerEventData eventData)
         {
-            if (eventData.Pointer == activePointer && !eventData.used)
+            if (eventData.Pointer == Pointer && !eventData.used)
             {
-                var delta = activePointer.Position - startPointerPosition;
+                var delta = Pointer.Position - startPointerPosition;
                 var handDelta = Vector3.Dot(SliderTrackDirection.normalized, delta);
 
-                SliderValue = Mathf.Clamp(startSliderValue + handDelta / SliderTrackDirection.magnitude, 0, 1);
+                Value = Mathf.Clamp(startValue + handDelta / SliderTrackDirection.magnitude, 0, 1);
 
                 // Mark the pointer data as used to prevent other behaviors from handling input events
                 eventData.Use();
             }
+
+            // Pass on to base
+            base.On_PointerDragged(eventData);
         }
-        public void OnPointerClicked(MixedRealityPointerEventData eventData) { }
-        #endregion
+
+        /// <inheritdoc/>
+        protected override void On_ValueUpdated(float oldValue, float newValue)
+        {
+            // Allow base to process first
+            base.On_ValueUpdated(oldValue, newValue);
+
+            // Update the UI
+            UpdateUI();
+        }
+        #endregion // Overrides / Event Handlers
     }
 }
