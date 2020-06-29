@@ -9,17 +9,17 @@ using Microsoft.MixedReality.Toolkit.UI;
 
 namespace Microsoft.MixedReality.Toolkit.Examples.Demos
 {
-    [AddComponentMenu("Scripts/MRTK/Examples/SliderLunarLander")]
-    public class SliderLunarLander : MonoBehaviour
+    [AddComponentMenu("Scripts/MRTK/Examples/RangeLunarLander")]
+    public class RangeLunarLander : MonoBehaviour
     {
         [SerializeField]
         private Transform transformLandingGear = null;
 
-        public void OnSliderUpdated(RangeValueEventData eventData)
+        public void OnRangeUpdated(RangeValueEventData eventData)
         {
             if (transformLandingGear != null)
             {
-                // Rotate the target object using Slider's eventData.NewValue
+                // Raise or lower the target object using Range's eventData.NewValue
                 transformLandingGear.localPosition = new Vector3(transformLandingGear.localPosition.x, 1.0f - eventData.NewValue, transformLandingGear.localPosition.z);
             }
         }

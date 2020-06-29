@@ -9,13 +9,13 @@ using Microsoft.MixedReality.Toolkit.UI;
 
 namespace Microsoft.MixedReality.Toolkit.Examples.Demos
 {
-    [AddComponentMenu("Scripts/MRTK/Examples/SliderChangeColor")]
-    public class SliderChangeColor : MonoBehaviour
+    [AddComponentMenu("Scripts/MRTK/Examples/RangeChangeColor")]
+    public class RangeChangeColor : MonoBehaviour
     {
         [SerializeField]
         private Renderer TargetRenderer;
 
-        public void OnSliderUpdatedRed(RangeValueEventData eventData)
+        public void OnRangeUpdatedRed(RangeValueEventData eventData)
         {
             TargetRenderer = GetComponentInChildren<Renderer>();
             if ((TargetRenderer != null) && (TargetRenderer.material != null))
@@ -24,7 +24,7 @@ namespace Microsoft.MixedReality.Toolkit.Examples.Demos
             }
         }
 
-        public void OnSliderUpdatedGreen(RangeValueEventData eventData)
+        public void OnRangeUpdatedGreen(RangeValueEventData eventData)
         {
             TargetRenderer = GetComponentInChildren<Renderer>();
             if ((TargetRenderer != null) && (TargetRenderer.material != null))
@@ -33,7 +33,7 @@ namespace Microsoft.MixedReality.Toolkit.Examples.Demos
             }
         }
 
-        public void OnSliderUpdateBlue(RangeValueEventData eventData)
+        public void OnRangeUpdateBlue(RangeValueEventData eventData)
         {
             TargetRenderer = GetComponentInChildren<Renderer>();
             if ((TargetRenderer != null) && (TargetRenderer.material != null))

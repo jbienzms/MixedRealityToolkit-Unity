@@ -10,13 +10,13 @@ using TMPro;
 
 namespace Microsoft.MixedReality.Toolkit.Examples.Demos
 {
-    [AddComponentMenu("Scripts/MRTK/Examples/ShowSliderValue")]
-    public class ShowSliderValue : MonoBehaviour
+    [AddComponentMenu("Scripts/MRTK/Examples/ShowRangeValue")]
+    public class ShowRangeValue : MonoBehaviour
     {
         [SerializeField]
         private TextMeshPro textMesh = null;
 
-        public void OnSliderUpdated(RangeValueEventData eventData)
+        public void OnRangeUpdated(RangeValueEventData eventData)
         {
             if (textMesh == null)
             {
