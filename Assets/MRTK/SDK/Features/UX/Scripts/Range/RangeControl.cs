@@ -68,12 +68,22 @@ namespace Microsoft.MixedReality.Toolkit.UI
     /// </summary>
     public abstract class RangeControl : MonoBehaviour, IMixedRealityRangeControl, IMixedRealityPointerHandler, IMixedRealityFocusHandler
     {
+        #region Constants
+        private const float VALUE_MIN = 0.0f;
+        private const float VALUE_MAX = 1.0f;
+        private const float VALUE_DEFAULT = VALUE_MIN;
+        #endregion // Constants
+
+        #region Member Variables
+        private float lastValue = VALUE_DEFAULT;
+        #endregion // Member Variables
+
         #region Unity Inspector Fields
         [Header("Range", order=0)]
         [Tooltip("The starting value of the control.")]
-        [Range(0, 1)]
+        [Range(VALUE_MIN, VALUE_MAX)]
         [SerializeField]
-        private float value = 0.0f;
+        private float value = VALUE_DEFAULT;
         #endregion // Unity Inspector Fields
 
         #region Internal Methods
@@ -108,6 +118,16 @@ namespace Microsoft.MixedReality.Toolkit.UI
 
         protected virtual void OnValidate()
         {
+        }
+
+        protected virtual void Update()
+        {
+            // Handle inspector changes
+            if (lastValue != value)
+            {
+                On_ValueUpdated(lastValue, value);
+                lastValue = value;
+            }
         }
         #endregion // Unity Overrides
 

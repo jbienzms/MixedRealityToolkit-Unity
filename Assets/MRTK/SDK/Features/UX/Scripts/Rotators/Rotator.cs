@@ -16,111 +16,148 @@ namespace Microsoft.MixedReality.Toolkit.UI
     [AddComponentMenu("Scripts/MRTK/SDK/Rotator")]
     public class Rotator : RangeControl
     {
+        #region Constants
+        private const float MIN_ANGLE_LOW = -180f;
+        private const float MIN_ANGLE_HIGH = 0f;
+        private const float MIN_ANGLE_DEFAULT = MIN_ANGLE_LOW;
+        private const float MAX_ANGLE_LOW = 0f;
+        private const float MAX_ANGLE_HIGH = 180f;
+        private const float MAX_ANGLE_DEFAULT = MAX_ANGLE_HIGH;
+        #endregion // Constants
+
         #region Member Variables
+        private float lastMaxAngle = MAX_ANGLE_DEFAULT;
+        private float lastMinAngle = MIN_ANGLE_DEFAULT;
+        private Rigidbody rigidBody;
         #endregion // Member Variables
 
         #region Unity Inspector Fields
-        [Tooltip("The GameObject that represents the grip.")]
+        [Tooltip("The joint that will supply rotational values.")]
         [SerializeField]
-        private GameObject gripRoot = null;
-        /// <summary>
-        /// Gets or sets the GameObject that represents the grip.
-        /// </summary>
-        public GameObject GripRoot { get { return gripRoot; } set { gripRoot = value; } }
+        private HingeJoint joint = null;
 
-        [Header("Visuals")]
-
-        [Tooltip("The gameObject that contains the tickMarks.  This will get rotated to match the slider axis")]
         [SerializeField]
-        private GameObject tickMarks = null;
-        /// <summary>
-        /// Gets or sets the GameObject that contains the desired tick marks.
-        /// </summary>
-        public GameObject TickMarks
-        {
-            get
-            {
-                return tickMarks;
-            }
-            set
-            {
-                if (tickMarks != value)
-                {
-                    tickMarks = value;
-                    UpdateTickMarks();
-                }
-            }
-        }
+        [Tooltip("The maximum angle that can be rotated to.")]
+        [Range(MAX_ANGLE_LOW, MAX_ANGLE_HIGH)]
+        private float maxAngle = MAX_ANGLE_DEFAULT;
+
+        [SerializeField]
+        [Tooltip("The minimum angle that can be rotated to.")]
+        [Range(MIN_ANGLE_LOW, MIN_ANGLE_HIGH)]
+        private float minAngle = MIN_ANGLE_DEFAULT;
         #endregion // Unity Inspector Fields
 
         #region Internal Methods
-        private void InitializeGrip()
+        /// <summary>
+        /// Handles the primary rotator joint being changed.
+        /// </summary>
+        /// <param name="oldJoint">
+        /// The old joint being replaced.
+        /// </param>
+        /// <param name="newJoint">
+        /// The new joint being assigned.
+        /// </param>
+        private void HandleJointChange(HingeJoint oldJoint, HingeJoint newJoint)
         {
-            //var startToThumb = gripRoot.transform.position - SliderStartPosition;
-            //var thumbProjectedOnTrack = SliderStartPosition + Vector3.Project(startToThumb, SliderTrackDirection);
-            //sliderThumbOffset = gripRoot.transform.position - thumbProjectedOnTrack;
+            // Current rigid body is no longer valid
+            rigidBody = null;
 
+            // If there is a new joint
+            if (newJoint != null)
+            {
+                // Get the new rigid body
+                rigidBody = newJoint.gameObject.GetComponent<Rigidbody>();
+
+                // Update angle limits for the joint
+                UpdateLimits();
+            }
+
+            // Update the UI to reflect
             UpdateUI();
         }
 
         /// <summary>
-        /// Update orientation of tick marks based on slider axis orientation
+        /// Handles initial setup of the joint.
         /// </summary>
-        private void UpdateTickMarks()
+        private void SetupJoint()
         {
-            /*
-            if (TickMarks)
+            // If joint is not currently specified, attempt to find one in the child tree.
+            if (joint == null)
             {
-                TickMarks.transform.localPosition = Vector3.zero;
-                TickMarks.transform.localRotation = Quaternion.identity;
-
-                var grid = TickMarks.GetComponent<Utilities.GridObjectCollection>();
-                if (grid)
-                {
-                    // Update cellwidth or cellheight depending on what was the previous axis set to
-                    var previousAxis = grid.Layout;
-                    if (previousAxis == Utilities.LayoutOrder.Vertical)
-                    {
-                        grid.CellWidth = grid.CellHeight;
-                    }
-                    else
-                    {
-                        grid.CellHeight = grid.CellWidth;
-                    }
-
-                    grid.Layout = (sliderAxis == SliderAxis.YAxis) ? Utilities.LayoutOrder.Vertical : Utilities.LayoutOrder.Horizontal;
-                    grid.UpdateCollection();
-                }
-
-                if (sliderAxis == SliderAxis.ZAxis)
-                {
-                    TickMarks.transform.localRotation = Quaternion.Euler(0.0f, 90.0f, 0.0f);
-                }
+                Joint = GetComponentInChildren<HingeJoint>();
             }
-            */
+
+            // If the joint is still missing, add it.
+            if (joint == null)
+            {
+                Joint = gameObject.AddComponent<HingeJoint>();
+            }
         }
 
+        /// <summary>
+        /// Updates angle limits for the joint.
+        /// </summary>
+        private void UpdateLimits()
+        {
+            if (joint != null)
+            {
+                JointLimits limits = new JointLimits();
+                limits.min = minAngle;
+                limits.max = maxAngle;
+                joint.limits = limits;
+                joint.useLimits = true;
+            }
+        }
+
+        /// <summary>
+        /// Updates UI elements to match the current value.
+        /// </summary>
         private void UpdateUI()
         {
-            /*
-            var newSliderPos = SliderStartPosition + sliderThumbOffset + SliderTrackDirection * value;
-            gripRoot.transform.position = newSliderPos;
-            */
+            // Only proceed if we have all required elements
+            if ((joint == null) || (rigidBody == null)) { return; }
+
+            // Get the total usable angle range
+            float angleRange = maxAngle - minAngle;
+
+            // Calculate angle along that range that represents the current value
+            float angle = (Value * angleRange) + minAngle;
+
+            // Calculate the rotation
+            Quaternion rotation = Quaternion.AngleAxis(angle, joint.axis);
+
+            //// Offset by transform
+            //rotation = rotation * rigidBody.transform.rotation;
+
+            Debug.Log($"Setting Angle: {rotation.eulerAngles}");
+
+            // Apply the rotation to the rigid body
+            rigidBody.rotation = rotation;
         }
         #endregion // Internal Methods
 
         #region Unity Overrides
         protected override void Start()
         {
-            if (gripRoot == null)
-            {
-                Debug.LogError($"{nameof(GripRoot)} on {gameObject.name} is not specified. {nameof(Rotator)} will be disabled.");
-                enabled = false;
-                return;
-            }
+            // Setup components
+            SetupJoint();
 
             // Pass on to base to complete
             base.Start();
+        }
+
+        protected override void Update()
+        {
+            // Handle inspector changes to angles
+            if ((lastMinAngle != minAngle) || (lastMaxAngle != maxAngle))
+            {
+                lastMinAngle = minAngle;
+                lastMaxAngle = maxAngle;
+                UpdateLimits();
+            }
+
+            // Pass on to base for additional updates
+            base.Update();
         }
         #endregion // Unity Overrides
 
@@ -135,5 +172,65 @@ namespace Microsoft.MixedReality.Toolkit.UI
             UpdateUI();
         }
         #endregion // Overrides / Event Handlers
+
+        #region Public Properties
+        /// <summary>
+        /// Gets or sets the joint that will supply rotational values.
+        /// </summary>
+        public HingeJoint Joint
+        {
+            get
+            {
+                return joint;
+            }
+            set
+            {
+                if (joint != value)
+                {
+                    HingeJoint oldJoint = joint;
+                    joint = value;
+                    HandleJointChange(oldJoint, joint);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the maximum angle that can be rotated to.
+        /// </summary>
+        public float MaxAngle
+        {
+            get
+            {
+                return maxAngle;
+            }
+            set
+            {
+                if (maxAngle != value)
+                {
+                    if ((value < MAX_ANGLE_LOW) || (value > MAX_ANGLE_HIGH)) { throw new ArgumentOutOfRangeException(nameof(value)); }
+                    maxAngle = value;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the minimum angle that can be rotated to.
+        /// </summary>
+        public float MinAngle
+        {
+            get
+            {
+                return minAngle;
+            }
+            set
+            {
+                if (minAngle != value)
+                {
+                    if ((value < MIN_ANGLE_LOW) || (value > MIN_ANGLE_HIGH)) { throw new ArgumentOutOfRangeException(nameof(value)); }
+                    minAngle = value;
+                }
+            }
+        }
+        #endregion // Public Properties
     }
 }
