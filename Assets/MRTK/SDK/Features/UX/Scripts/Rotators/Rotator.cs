@@ -67,7 +67,7 @@ namespace Microsoft.MixedReality.Toolkit.UI
             {
                 // Get the new rigid body
                 rigidBody = newJoint.gameObject.GetComponent<Rigidbody>();
-
+                // ConfigurableJoint
                 // Update angle limits for the joint
                 UpdateLimits();
             }
